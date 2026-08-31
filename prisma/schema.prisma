@@ -1,0 +1,198 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String             @id @default(cuid())
+  name         String
+  email        String             @unique
+  passwordHash String
+  role         String             @default("developer")
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  profile      Profile?
+  resumes      Resume[]
+  applications Application[]
+  interviews   Interview[]
+  submissions  CodingSubmission[]
+  skillGaps    SkillGap[]
+  roadmaps     Roadmap[]
+  chatMessages CareerAgentChat[]
+}
+
+model Profile {
+  id           String    @id @default(cuid())
+  userId       String    @unique
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  headline     String?
+  bio          String?
+  targetRole   String?   @default("Full Stack Developer")
+  yearsOfExp   Int?      @default(1)
+  location     String?
+  githubUrl    String?
+  linkedinUrl  String?
+  portfolioUrl String?
+  skills       Skill[]
+  projects     Project[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Skill {
+  id          String   @id @default(cuid())
+  profileId   String
+  profile     Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  name        String
+  category    String   @default("Frontend") // Frontend, Backend, Database, Cloud, DevOps, AI
+  proficiency String   @default("Intermediate") // Beginner, Intermediate, Advanced, Expert
+  createdAt   DateTime @default(now())
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  profileId   String
+  profile     Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  title       String
+  description String
+  techStack   String // comma-separated or JSON
+  repoUrl     String?
+  liveUrl     String?
+  highlights  String?
+  createdAt   DateTime @default(now())
+}
+
+model Resume {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fileName        String
+  rawText         String
+  score           Int      @default(70)
+  strengths       String // JSON array string
+  weaknesses      String // JSON array string
+  detectedSkills  String // JSON array string
+  recommendations String // JSON array string
+  createdAt       DateTime @default(now())
+}
+
+model Job {
+  id              String        @id @default(cuid())
+  title           String
+  company         String
+  location        String
+  type            String        @default("Remote") // Remote, Hybrid, Onsite
+  salaryMin       Int?
+  salaryMax       Int?
+  requiredSkills  String // JSON array string
+  description     String
+  experienceLevel String        @default("Mid-Level")
+  applyUrl        String?
+  applications    Application[]
+  createdAt       DateTime      @default(now())
+}
+
+model Application {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobId       String?
+  job         Job?      @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  company     String
+  role        String
+  status      String    @default("APPLIED") // SAVED, APPLIED, OA, INTERVIEW, OFFER, REJECTED
+  appliedDate DateTime  @default(now())
+  salary      String?
+  notes       String?
+  jobUrl      String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Interview {
+  id              String              @id @default(cuid())
+  userId          String
+  user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role            String
+  experienceLevel String              @default("Junior")
+  difficulty      String              @default("Medium") // Easy, Medium, Hard
+  type            String              @default("Technical") // Technical, Behavioral, System Design
+  overallScore    Int?
+  overallFeedback String?
+  questions       InterviewQuestion[]
+  createdAt       DateTime            @default(now())
+}
+
+model InterviewQuestion {
+  id          String            @id @default(cuid())
+  interviewId String
+  interview   Interview         @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  order       Int               @default(1)
+  question    String
+  category    String            @default("Core Concepts")
+  idealAnswer String?
+  answers     InterviewAnswer[]
+}
+
+model InterviewAnswer {
+  id              String            @id @default(cuid())
+  questionId      String
+  question        InterviewQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  candidateAnswer String
+  score           Int?
+  feedback        String?
+  rubricScores    String? // JSON object string: { technical: 8, communication: 7, completeness: 8 }
+  createdAt       DateTime          @default(now())
+}
+
+model CodingSubmission {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problemId       String
+  title           String
+  language        String   @default("javascript")
+  code            String
+  status          String   @default("Passed") // Passed, Failed, Error, Running
+  passedTests     Int      @default(0)
+  totalTests      Int      @default(0)
+  executionTimeMs Int      @default(0)
+  output          String?
+  createdAt       DateTime @default(now())
+}
+
+model SkillGap {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetRole     String
+  missingSkills  String // JSON array
+  matchedSkills  String // JSON array
+  readinessScore Int      @default(50)
+  createdAt      DateTime @default(now())
+}
+
+model Roadmap {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetRole      String
+  milestones      String // JSON array of { id, title, category, completed, weeksToComplete, resources: [...] }
+  progressPercent Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model CareerAgentChat {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      String // "user" | "assistant"
+  content   String
+  citations String? // JSON array
+  createdAt DateTime @default(now())
+}
