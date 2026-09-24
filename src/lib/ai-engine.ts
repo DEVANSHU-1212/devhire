@@ -1,4 +1,4 @@
-import { ResumeAnalysis, InterviewQuestionItem, InterviewAnswerItem } from "./types";
+import { ResumeAnalysis, InterviewQuestionItem, InterviewAnswerItem, ProjectBlueprint } from "./types";
 
 const ALL_SKILL_KEYWORDS = [
   "JavaScript", "TypeScript", "React", "Next.js", "Vue.js", "Angular", "Svelte", "Node.js", "Express.js",
@@ -382,3 +382,213 @@ Based on your current profile and career trajectory:
     ],
   };
 }
+
+/**
+ * AI Personalized Portfolio Project Blueprint Builder
+ */
+export async function generateProjectBlueprintAI(
+  targetRole: string,
+  seniority: string,
+  missingSkills: string[],
+  userInterests: string = "High-scale real-time systems"
+): Promise<ProjectBlueprint> {
+  const prompt = `You are an elite Staff Software Architect & Principal Engineering Mentor at DevHire.
+Generate a custom, highly technical portfolio project blueprint designed specifically to prove mastery of these missing skills: ${missingSkills.join(", ")}.
+Target Role: ${seniority} ${targetRole}.
+Engineering Focus: ${userInterests}.
+
+Return ONLY valid JSON matching this schema:
+{
+  "id": "proj-custom-ai",
+  "title": "string (Compelling, production-grade project name)",
+  "tagline": "string (One-line technical description of features and scale)",
+  "difficulty": "Intermediate" | "Advanced" | "Expert",
+  "estimatedWeeks": number (2-5),
+  "targetSkills": ["string"],
+  "architectureSummary": "string (Deep architectural paragraph)",
+  "systemDesignOverview": "string (Numbered 1-4 step data flow and component topology)",
+  "techStack": [
+    { "layer": "Frontend" | "Backend" | "Database" | "Cache" | "DevOps" | "AI", "tech": "string", "reason": "string" }
+  ],
+  "phases": [
+    {
+      "phase": 1,
+      "title": "string",
+      "duration": "Week 1",
+      "deliverables": ["string", "string", "string"],
+      "gitMilestone": "string"
+    }
+  ],
+  "portfolioChecklist": ["string", "string", "string"],
+  "prdMarkdown": "string (Full markdown PRD formatted document)"
+}`;
+
+  const ollamaResponse = await callOllama(prompt, true);
+  if (ollamaResponse) {
+    try {
+      const parsed = JSON.parse(ollamaResponse);
+      if (parsed.title && parsed.phases) {
+        return parsed;
+      }
+    } catch {
+      // fallback
+    }
+  }
+
+  // Deterministic high-caliber fallback tailored to the skills
+  const skillsLabel = missingSkills.slice(0, 3).join(" & ") || "Full-Stack Architecture";
+  return {
+    id: `proj-ai-${Date.now()}`,
+    title: `Distributed Real-Time Engine with ${skillsLabel}`,
+    tagline: `High-concurrency microservice system engineered to demonstrate production mastery of ${missingSkills.join(", ")}.`,
+    difficulty: seniority.includes("Senior") || seniority.includes("Staff") ? "Expert" : "Advanced",
+    estimatedWeeks: 3,
+    targetSkills: missingSkills.length > 0 ? missingSkills : ["Redis", "Docker", "PostgreSQL", "System Design"],
+    architectureSummary: `An end-to-end distributed system orchestrating multi-region state synchronization, high-throughput caching with Redis, resilient database persistence via PostgreSQL, and automated CI/CD container orchestration with Docker.`,
+    systemDesignOverview: `1. Ingestion Layer: REST & WebSocket gateway handles concurrent client requests with sliding-window rate limiters.
+2. In-Memory Cache & Broker: Redis manages cache-aside caching, sub-millisecond session state, and pub/sub message broadcast.
+3. Persistence & Relational Schema: PostgreSQL with ACID transactions, composite indexing, and database migrations.
+4. Containerization & CI/CD: Docker Compose for local orchestration, multi-stage Dockerfile, and GitHub Actions automated test suites.`,
+    techStack: [
+      { layer: "Frontend", tech: "Next.js 15 & Tailwind CSS", reason: "Server Components, responsive glassmorphic UI, and live telemetry dashboards." },
+      { layer: "Backend", tech: "Node.js / Express & TypeScript", reason: "Asynchronous event-driven I/O with strict type safety." },
+      { layer: "Cache & Broker", tech: "Redis", reason: "Distributed locks, sliding-window rate limiting, and pub/sub events." },
+      { layer: "Database", tech: "PostgreSQL & Prisma ORM", reason: "ACID compliance, composite indexing, and automated schema migrations." },
+      { layer: "DevOps", tech: "Docker & GitHub Actions", reason: "Reproducible container builds and automated lint/test CI pipelines." },
+    ],
+    phases: [
+      {
+        phase: 1,
+        title: "Relational Schema, Docker Environment & Core APIs",
+        duration: "Week 1",
+        deliverables: [
+          "Setup multi-container Docker Compose with Node.js and PostgreSQL.",
+          "Design Prisma relational schema with indexing and foreign key constraints.",
+          "Implement JWT auth and input validation using Zod schemas.",
+        ],
+        gitMilestone: "feat(core): docker environment and prisma database schema",
+      },
+      {
+        phase: 2,
+        title: "Redis In-Memory Caching & Rate Limiting Engine",
+        duration: "Week 2",
+        deliverables: [
+          "Build sliding-window rate limiter preventing API abuse (100 req/min).",
+          "Implement cache-aside pattern with automatic TTL invalidation on updates.",
+          "Run benchmark load tests with autocannon validating sub-15ms response times.",
+        ],
+        gitMilestone: "feat(perf): redis caching layer and sliding-window rate limiting",
+      },
+      {
+        phase: 3,
+        title: "Production Hardening, CI/CD & Visual Portfolio Documentation",
+        duration: "Week 3",
+        deliverables: [
+          "Author comprehensive README with Mermaid system design diagrams.",
+          "Configure GitHub Actions workflow for automated test assertions.",
+          "Deploy live containerized demo and document performance benchmarks.",
+        ],
+        gitMilestone: "chore(deploy): github actions ci and architecture documentation",
+      },
+    ],
+    portfolioChecklist: [
+      "Public GitHub repository with clean Conventional Commit history",
+      "Mermaid architecture diagram & setup instructions in README",
+      "Quantifiable performance benchmarks (e.g. 95th percentile latency < 20ms)",
+      "Live working demo deployment with HTTPS",
+    ],
+    prdMarkdown: `# Product Requirements Document (PRD)
+## Project: Distributed Real-Time Engine with ${skillsLabel}
+
+### 1. Objective
+Build an industry-standard, production-ready portfolio piece demonstrating applied competence in ${missingSkills.join(", ")} for ${seniority} ${targetRole} positions.
+
+### 2. Architecture & Data Flow
+\`\`\`mermaid
+graph TD
+    Client[Client App / Web Dashboard] -->|HTTPS / WSS| Gateway[API Gateway & Rate Limiter]
+    Gateway -->|Cache Check| Redis[(Redis In-Memory Cache)]
+    Gateway -->|Durable Persistence| Postgres[(PostgreSQL DB)]
+    Gateway -->|Container Runtime| Docker[Docker Swarm / Cloud]
+\`\`\`
+
+### 3. Deliverables Checklist
+- [x] Docker-compose starts all services with zero environment drift.
+- [x] Redis caching layer reduces database load by >70%.
+- [x] Unit & integration test suites achieve >85% coverage.`,
+  };
+}
+
+/**
+ * AI Milestone Coach & Explainer
+ */
+export async function explainMilestoneAI(
+  milestoneTitle: string,
+  category: string,
+  context: string = ""
+): Promise<{ explanation: string; keyTakeaways: string[]; sampleCode: string; exercise: string }> {
+  const prompt = `You are a Principal Engineering Instructor at DevHire.
+Explain this roadmap milestone concept for a developer:
+Milestone: "${milestoneTitle}"
+Category: "${category}"
+Context: "${context}"
+
+Provide an intuitive explanation, 3 key engineering takeaways, a practical TypeScript/Bash/SQL code snippet, and a hands-on exercise challenge.
+Return ONLY valid JSON:
+{
+  "explanation": "string (2-3 paragraphs with markdown)",
+  "keyTakeaways": ["string", "string", "string"],
+  "sampleCode": "string (executable code snippet with comments)",
+  "exercise": "string (practical challenge)"
+}`;
+
+  const ollamaResponse = await callOllama(prompt, true);
+  if (ollamaResponse) {
+    try {
+      const parsed = JSON.parse(ollamaResponse);
+      if (parsed.explanation && parsed.keyTakeaways) {
+        return parsed;
+      }
+    } catch {
+      // fallback
+    }
+  }
+
+  return {
+    explanation: `### Mastering ${milestoneTitle}
+In modern high-scale engineering, **${milestoneTitle}** is a critical capability. It transforms traditional monolithic workflows into resilient, distributed systems capable of handling millions of concurrent requests with predictable latency.
+
+By implementing this pattern, you eliminate single-point-of-failure bottlenecks, decouple compute from state, and enable seamless horizontal scaling.`,
+    keyTakeaways: [
+      "Decouple stateful operations using in-memory or message broker layers.",
+      "Always design with idempotency and graceful failure recovery in mind.",
+      "Profile real-world performance metrics (p95 latency, throughput, memory footprint).",
+    ],
+    sampleCode: `// Example: Sliding-Window Rate Limiting with Redis & TypeScript
+import Redis from "ioredis";
+
+const redis = new Redis(process.env.REDIS_URL || "redis://localhost:6379");
+
+export async function checkRateLimit(userId: string, limit = 60, windowSec = 60): Promise<{ allowed: boolean; remaining: number }> {
+  const now = Date.now();
+  const clearBefore = now - windowSec * 1000;
+  const key = \`rate_limit:\${userId}\`;
+
+  const multi = redis.multi();
+  multi.zremrangebyscore(key, 0, clearBefore);
+  multi.zadd(key, now, \`\${now}-\${Math.random()}\`);
+  multi.zcard(key);
+  multi.expire(key, windowSec);
+
+  const results = await multi.exec();
+  const requestCount = results?.[2]?.[1] as number;
+
+  return {
+    allowed: requestCount <= limit,
+    remaining: Math.max(0, limit - requestCount),
+  };
+}`,
+    exercise: `Challenge: Clone a sample Express/Next.js API and implement the Redis sliding-window middleware above. Simulate 100 concurrent requests using autocannon or curl to verify HTTP 429 status code handling.`,
+  };
+}
+

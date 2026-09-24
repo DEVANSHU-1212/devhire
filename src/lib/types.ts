@@ -65,6 +65,7 @@ export interface JobItem {
   matchScore?: number;
   matchedSkills?: string[];
   missingSkills?: string[];
+  explanation?: string;
 }
 
 export type ApplicationStatus = "SAVED" | "APPLIED" | "OA" | "INTERVIEW" | "OFFER" | "REJECTED";
@@ -144,17 +145,75 @@ export interface CodingSubmissionResult {
   }[];
 }
 
+export type SeniorityLevel = "Junior" | "Mid-Level" | "Senior" | "Staff / Lead" | "Principal";
+
+export interface SkillBenchmarkItem {
+  category: string;
+  candidateScore: number;
+  marketBenchmark: number;
+  fullMark: number;
+}
+
+export interface SalaryImpactItem {
+  skill: string;
+  salaryBoostAvg: number;
+  demandIndex: number; // 1-100
+  category: string;
+  rationale: string;
+}
+
+export interface ProjectPhaseMilestone {
+  phase: number;
+  title: string;
+  duration: string;
+  deliverables: string[];
+  gitMilestone: string;
+}
+
+export interface ProjectBlueprint {
+  id: string;
+  title: string;
+  tagline: string;
+  difficulty: "Intermediate" | "Advanced" | "Expert";
+  estimatedWeeks: number;
+  targetSkills: string[];
+  architectureSummary: string;
+  systemDesignOverview: string;
+  techStack: {
+    layer: string;
+    tech: string;
+    reason: string;
+  }[];
+  phases: ProjectPhaseMilestone[];
+  portfolioChecklist: string[];
+  prdMarkdown: string;
+}
+
+export interface MissingSkill {
+  name: string;
+  priority: "High" | "Medium" | "Low";
+  estimatedWeeks: number;
+  category: string;
+  impactScore: number; // 1-10
+  description?: string;
+}
+
 export interface SkillGapAnalysis {
   targetRole: string;
+  seniority: SeniorityLevel;
   readinessScore: number;
   matchedSkills: string[];
-  missingSkills: {
-    name: string;
-    priority: "High" | "Medium" | "Low";
-    estimatedWeeks: number;
-    category: string;
-  }[];
+  missingSkills: MissingSkill[];
+  missingCategorized: {
+    core: MissingSkill[];
+    accelerators: MissingSkill[];
+    bonus: MissingSkill[];
+  };
+  salaryImpacts: SalaryImpactItem[];
+  totalProjectedSalaryBoost: number;
+  benchmarks: SkillBenchmarkItem[];
   milestones: RoadmapMilestone[];
+  suggestedProject: ProjectBlueprint;
 }
 
 export interface RoadmapMilestone {
@@ -164,6 +223,8 @@ export interface RoadmapMilestone {
   category: string;
   weeksToComplete: number;
   completed: boolean;
+  learningHours?: number;
+  keyConcepts?: string[];
   resources: {
     title: string;
     url: string;
