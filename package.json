@@ -7,9 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "postinstall": "prisma generate",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "db:use:postgres": "node scripts/switch-db.js postgres && prisma generate",
+    "db:use:sqlite": "node scripts/switch-db.js sqlite && prisma generate"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",

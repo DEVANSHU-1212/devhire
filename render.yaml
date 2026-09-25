@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: devhire
+    runtime: node
+    plan: free
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: devhire-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: NEXT_PUBLIC_APP_URL
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+
+databases:
+  - name: devhire-db
+    plan: free
+    databaseName: devhire
+    user: devhire_user
